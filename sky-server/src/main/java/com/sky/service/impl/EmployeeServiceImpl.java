@@ -30,6 +30,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private EmployeeMapper employeeMapper;
 
+
+    /**
+     * 根据员工ID查询员工信息
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee selectById(Long id) {
+        Employee employee = employeeMapper.selectById(id);
+        employee.setPassword("******");
+        return employee;
+    }
+
     /**
      * 员工登录
      *
@@ -139,10 +152,29 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .updateUser(BaseContext.getCurrentId())
                 .status(status)
                 .build();
-
-
         //应该对应传递一个实体类进去
         employeeMapper.update(employee);
     }
+
+    /**
+     * 根据id修改信息- - -调用了动态SQL
+     * @param employeeDTO
+     * @return
+     */
+    @Override
+    public Employee updateEmployeeMessage(EmployeeDTO employeeDTO) {
+        Employee employee = Employee.builder()
+                .id(employeeDTO.getId())
+                .name(employeeDTO.getName())
+                .idNumber(employeeDTO.getIdNumber())
+                .phone(employeeDTO.getPhone())
+                .sex(employeeDTO.getSex())
+                .username(employeeDTO.getUsername())
+                .build();
+        employeeMapper.update(employee);
+        employee.setPassword("******");
+        return  employee;
+    }
+
 
 }

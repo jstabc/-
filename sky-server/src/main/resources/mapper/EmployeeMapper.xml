@@ -13,7 +13,10 @@
             <if test="username != null">username = #{username},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="updateUser != null">update_user = #{updateUser},</if>
-            <if test="status != null">status = #{status}</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="idNumber != null">id_number = #{idNumber},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="sex != null">sex = #{sex},</if>
         </set>
         where id = #{id}
     </update>
@@ -30,4 +33,12 @@
         </where>
         order by create_time desc
     </select>
+
+
+    <!--  通过员工id 查询 员工信息  -->
+    <select id="selectById" resultType="com.sky.entity.Employee">
+        select * from employee where id = #{id}
+    </select>
+
+
 </mapper>

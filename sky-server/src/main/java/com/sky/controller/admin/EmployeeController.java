@@ -15,7 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -115,5 +114,29 @@ public class EmployeeController {
         employeeService.startOrStop(status, id);
         return Result.success();
     }
+
+
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询员工信息")
+    public Result<Employee> selectById(@PathVariable Long id) {
+        log.info("索要查询的id{}", id);
+        Employee employee = employeeService.selectById(id);
+        return Result.success(employee);
+    }
+
+
+    /**
+     * 修改员工信息
+     * @param employeeDTO
+     * @return
+     */
+    @PutMapping
+    @ApiOperation("修改员工信息")
+    public Result<Employee> updateEmployeeMessage(@RequestBody EmployeeDTO employeeDTO) {
+        log.info("员工信息：{}", employeeDTO);
+        Employee employee = employeeService.updateEmployeeMessage(employeeDTO);
+        return Result.success(employee);
+    }
+
 
 }
