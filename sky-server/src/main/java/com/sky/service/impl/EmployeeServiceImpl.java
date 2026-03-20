@@ -99,14 +99,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         //状态设置
         employee.setStatus(StatusConstant.ENABLE);
 
-        //创建时间，修改时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        //创建人，修改人
-        //TODO 还没有完全解决这个问题！
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.insert(employee);
 
