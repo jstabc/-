@@ -75,6 +75,7 @@ public class EmployeeController {
     @PostMapping("/logout")
     @ApiOperation("员工退出")
     public Result<String> logout() {
+        System.out.println("收到登录请求了！！！");
         return Result.success();
     }
 

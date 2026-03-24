@@ -2,12 +2,16 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealDishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -28,6 +32,10 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
+
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
+
     /**
      * 新增菜品与口味接口实现-对多个数据库中表进行操作，要添加事务注解，一致性！！
      * @param dishDTO
@@ -74,6 +82,45 @@ public class DishServiceImpl implements DishService {
         Page<DishVO> page = dishMapper.pageQuer(dishPageQueryDTO);
 
         return new  PageResult(page.getTotal(), page.getResult());
+
+    }
+
+
+    /**
+     * 菜品批量删除
+     * @param ids
+     */
+    @Override
+    @Transactional
+    public void deleteBatch(List<Long> ids) {
+        log.info("菜品批量删除,{}",ids.size());
+
+        //1.判断当前菜品是否能够删除 - - 是否存起售中的菜品
+        for (Long id : ids) {
+            Dish dish = dishMapper.getById(id);
+            if (dish.getStatus() == StatusConstant.ENABLE) {
+                throw new RuntimeException(MessageConstant.DISH_ON_SALE);
+            }
+        }
+
+
+        //2.                         - - 是否被套餐关联了
+        List<Long> setmealIdsByDishIds = setmealDishMapper.getSetmealIdsByDishIds(ids);
+        if (setmealIdsByDishIds != null && setmealIdsByDishIds.size() > 0) {
+            //关联套餐 - - 不删除
+            throw new RuntimeException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+        }
+
+
+        //3.                           删除菜品表中的菜品数据
+        //ids.for  可以进行for循环！
+        for (Long id : ids) {
+            dishMapper.deleteById(id);
+            //传过去的是形参，在另外的地方可以随意改变！！！
+            dishFlavorMapper.deleteByDishId(id);
+        }
+        //4.                            删除餐品关联的口味数据
+        //这个删除操作可以并入 第三个条件，不管有没有直接删除就行了！
 
     }
 }
