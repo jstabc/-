@@ -6,11 +6,13 @@ import com.sky.entity.Dish;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 import java.util.List;
 
@@ -23,6 +25,8 @@ public class DishController {
 
     @Autowired
     private DishService dishService;
+    @Autowired
+    private ResourceUrlProvider resourceUrlProvider;
 
 
     /**
@@ -64,6 +68,37 @@ public class DishController {
         dishService.deleteBatch(ids);
         return Result.success();
     }
+
+
+    /**
+     * 根据id查询菜品信息
+     * @param id
+     * @return
+     */
+    @ApiOperation("根据id查询菜品")
+    @GetMapping("/{id}")
+    public Result<DishVO> getById(@PathVariable long id) {
+        log.info("记录传过来的要修改的id值{}",id);
+        DishVO dishvo = dishService.selectDish(id);
+        return Result.success(dishvo);
+    }
+
+
+    /**
+     * 修改菜品信息
+     * @param dishDTO
+     * @return
+     */
+    @PutMapping
+    @ApiOperation("更新菜品信息")
+    public Result update(@RequestBody DishDTO dishDTO){
+        log.info("传过来的菜品信息{}",dishDTO);
+        dishService.updateDishWithFlavor(dishDTO);
+        return Result.success();
+    }
+
+
+
 
 
 

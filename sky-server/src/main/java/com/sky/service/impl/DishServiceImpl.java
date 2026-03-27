@@ -11,13 +11,13 @@ import com.sky.entity.DishFlavor;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
-import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,4 +123,75 @@ public class DishServiceImpl implements DishService {
         //这个删除操作可以并入 第三个条件，不管有没有直接删除就行了！
 
     }
+
+
+    /**
+     * 菜品数据回显
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public DishVO selectDish(Long id) {
+        log.info("通过菜品id查询菜品信息{}",id);
+        //这是一个返回拼接信息的逻辑
+        //1 通过id 查询 菜品信息
+        //2 通过菜品里面的数据 查询 口味数据库中的数据
+        //3 拼接 两个 信息 进行返回
+
+        // 通过 id 查询 菜品信息
+        Dish dish = dishMapper.getById(id);
+        //找到 两个数据库表格的联系
+     //   Long dishId = dish.getId();
+        //通过联系 查找另外一个数据库中的信息
+        List<DishFlavor> dishFlavor = dishFlavorMapper.getById(id);
+
+        // 进行拼接！ - - 属性拷贝， 分别创建出所需要的 表格类！
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish,dishVO);
+
+        dishVO.setFlavors(dishFlavor);
+
+        return dishVO;
+
+    }
+
+    /**
+     * 菜品信息的更新
+     * @param dishDTO
+     */
+    @Override
+    @Transactional
+    public void updateDishWithFlavor(DishDTO dishDTO) {
+        //我需要对所给信息进行拆分
+        //然后把拆分出来的数据 更新到数据库！
+        //这里-菜品口味数据，因为不知道要不要修改
+        //有好多条，所以 - 可以先删除口味数据，然后在插入口味数据！
+
+        //修改菜品基本信息
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        dishMapper.update(dish);
+
+        //删除所有口味数据
+        dishFlavorMapper.deleteByDishId(dish.getId());
+
+        //插入口味数据
+        // 2. 获取生成的菜品 ID
+        Long dishId = dish.getId();
+
+        // 3. 处理口味数据：DTO 里的 flavors 列表需要关联这个 dishId
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if (flavors != null && flavors.size() > 0) {
+            flavors.forEach(flavor -> {
+                flavor.setDishId(dishId); // 为每个口味设置所属的菜品 ID
+            });
+            // 4. 批量插入保存口味数据
+            dishFlavorMapper.insertBatch(flavors);
+        }
+
+
+    }
+
+
 }
