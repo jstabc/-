@@ -10,6 +10,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @Slf4j
+//通过配置类已经把Redis创建好了。
+//通过调用这里，就可以把数据直接传入redis数据库了！，这里面也不需要写什么方法，都是已经封装好的方法！
+//跟传统的MySQL方式，还是有区别的！ 不是Controller，service，mapper 三层结构架构。
 public class RedisConfiguration {
 
     @Bean
